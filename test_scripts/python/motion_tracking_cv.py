@@ -2,19 +2,34 @@
 
 import cv
 import inspect
+import math 
+
+
+class TrackedObject: 
+    def __init__(self, latest_position = (0,0), movement_vector = [], state = "out"):
+        self.latest_position=latest_position
+        self.movement_vector = movement_vector
+        self.state = state
 
 class Target:
 
     def __init__(self):
 
-        self.capture = cv.CaptureFromCAM(0)
+        #self.capture = cv.CaptureFromCAM(0)
+        self.capture = cv.CaptureFromFile("rasmus.mov")
+        #TODO!
+        #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320)
+        #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
+        
         # Creates a new window
         cv.NamedWindow("Target", 1)
+        self.tracked_objects = []
 
     def run(self):
         # Capture first frame to get size
         frame = cv.QueryFrame(self.capture)
         frame_size = cv.GetSize(frame)
+        print frame_size
         color_image = cv.CreateImage(cv.GetSize(frame), 8, 3)
         grey_image = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_8U, 1)
         moving_average = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_32F, 3)
@@ -23,9 +38,6 @@ class Target:
         k = 0
         while True:
             k+=1
-            closest_to_left = cv.GetSize(frame)[0]
-            closest_to_right = cv.GetSize(frame)[1]
-
             color_image = cv.QueryFrame(self.capture)
 
             # Smooth to get rid of false positives
@@ -58,17 +70,40 @@ class Target:
             storage = cv.CreateMemStorage(0)
             contour = cv.FindContours(grey_image, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_TC89_KCOS)
             points = []
-            #print inspect.getmembers(contour)
-
             cv.DrawContours(color_image, contour, cv.CV_RGB(255,0,0), cv.CV_RGB(255,0,255), 2, 1, 8, (0, 0))
             i = 0
             while contour:
-                print "Having k= "+ str(k) + " and i=" + str(i)
-                print contour
                 i+=1
                 bound_rect = cv.BoundingRect(list(contour))
-                
-                print bound_rect
+
+                center_x = bound_rect[0] + (bound_rect[0] + bound_rect[2])/2
+                center_y = bound_rect[1] + (bound_rect[1] + bound_rect[3])/2
+                print "ITERATION ", k, "CONTOUR ", k, "CENTER ", center_x, center_y
+
+                closest_distance = 10000
+                closest_object = None
+                for to in self.tracked_objects: 
+                    current_distance = math.hypot(to.latest_position[0] - center_x, to.latest_position[1] - center_y)
+                    closest_distance = min(closest_distance, current_distance)                    
+                    print "DISTANCES: ", str(closest_distance), str(current_distance)
+                    if current_distance == closest_distance:
+                        closest_object = to
+
+                if closest_object is None:
+                    print "OBJECT IS NEW"
+                    self.tracked_objects.append(TrackedObject((center_x, center_y), [(center_x, center_y)], "new"))
+                else: 
+                    print "CLOSEST OBJECT: ", closest_object.latest_position
+                    closest_object.movement_vector.append((center_x, center_y))
+                    closest_object.latest_position = (center_x, center_y)
+                print "AMOUNT OF OBJECTS: ", str(len(self.tracked_objects))
+
+                if closest_object is not None:
+                    cv.Line(color_image, closest_object.latest_position, (center_x, center_y), cv.CV_RGB(0,255,0))
+                   
+                    #closest_x = min(closest_x, to.latest_position[0])
+                    #closest_y = min(closest_y, to.latest_position[0])
+
                 contour = contour.h_next()
 
                 pt1 = (bound_rect[0], bound_rect[1])
@@ -79,14 +114,7 @@ class Target:
                 cv.PutText(color_image, str(i), pt1, font, cv.CV_RGB(255,0,255))
 
             
-                    
-            # if len(points):
-            #     center_point = reduce(lambda a, b: ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2), points)
-            #     cv.Circle(color_image, center_point, 40, cv.CV_RGB(255, 255, 255), 1)
-            #     cv.Circle(color_image, center_point, 30, cv.CV_RGB(255, 100, 0), 1)
-            #     cv.Circle(color_image, center_point, 20, cv.CV_RGB(255, 255, 255), 1)
-            #     cv.Circle(color_image, center_point, 10, cv.CV_RGB(255, 100, 0), 1)
-
+            #print "Iteration ", k, " Vector: ", vectors["1"]
             cv.ShowImage("Target", color_image)
             
             #Listen for ESC key
