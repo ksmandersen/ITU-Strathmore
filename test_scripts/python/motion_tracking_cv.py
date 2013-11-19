@@ -70,33 +70,35 @@ class Target:
             storage = cv.CreateMemStorage(0)
             contour = cv.FindContours(grey_image, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_TC89_KCOS)
             points = []
-            cv.DrawContours(color_image, contour, cv.CV_RGB(255,0,0), cv.CV_RGB(255,0,255), 2, 1, 8, (0, 0))
+            #cv.DrawContours(color_image, contour, cv.CV_RGB(255,0,0), cv.CV_RGB(255,0,255), 2, 1, 8, (0, 0))
             i = 0
             while contour:
-                i+=1
+
                 bound_rect = cv.BoundingRect(list(contour))
 
-                center_x = bound_rect[0] + (bound_rect[0] + bound_rect[2])/2
-                center_y = bound_rect[1] + (bound_rect[1] + bound_rect[3])/2
-                print "ITERATION ", k, "CONTOUR ", k, "CENTER ", center_x, center_y
-
+                center_x = bound_rect[0] + (bound_rect[2]/2)
+                center_y = bound_rect[1] + (bound_rect[3]/2)
+                print "CENTER ", center_x, center_y
+                #if center_y < 200:
+                #    continue
+                i+=1
                 closest_distance = 10000
                 closest_object = None
                 for to in self.tracked_objects: 
                     current_distance = math.hypot(to.latest_position[0] - center_x, to.latest_position[1] - center_y)
                     closest_distance = min(closest_distance, current_distance)                    
-                    print "DISTANCES: ", str(closest_distance), str(current_distance)
+                    #print "DISTANCES: ", str(closest_distance), str(current_distance)
                     if current_distance == closest_distance:
                         closest_object = to
 
                 if closest_object is None:
-                    print "OBJECT IS NEW"
+                    #print "OBJECT IS NEW"
                     self.tracked_objects.append(TrackedObject((center_x, center_y), [(center_x, center_y)], "new"))
                 else: 
-                    print "CLOSEST OBJECT: ", closest_object.latest_position
+                    #print "CLOSEST OBJECT: ", closest_object.latest_position
                     closest_object.movement_vector.append((center_x, center_y))
                     closest_object.latest_position = (center_x, center_y)
-                print "AMOUNT OF OBJECTS: ", str(len(self.tracked_objects))
+                #print "AMOUNT OF OBJECTS: ", str(len(self.tracked_objects))
 
                 if closest_object is not None:
                     cv.Line(color_image, closest_object.latest_position, (center_x, center_y), cv.CV_RGB(0,255,0))
@@ -112,13 +114,27 @@ class Target:
                 points.append(pt2)
                 cv.Rectangle(color_image, pt1, pt2, cv.CV_RGB(0,0,255), 1)
                 cv.PutText(color_image, str(i), pt1, font, cv.CV_RGB(255,0,255))
+                cv.Circle(color_image, (center_x, center_y), 2, cv.CV_RGB(255,0,255), 2, 8, 0)
 
-            
+            print "LEN ", len(self.tracked_objects)
+            if len(self.tracked_objects) > 0 and self.tracked_objects[0] is not None:
+                #print "ENTRE"
+                obj_vector = self.tracked_objects[0].movement_vector
+                print "MVV LEN ", len(obj_vector)
+                for index in range(0, len(obj_vector)-2):
+                    try: 
+                        print "Index ", index, "len(obj_vector) ", len(obj_vector)
+                        cv.Line(color_image, obj_vector[index], obj_vector[index+1], cv.CV_RGB(0,255,0))
+
+                    except: print "oops"
+
             #print "Iteration ", k, " Vector: ", vectors["1"]
             cv.ShowImage("Target", color_image)
             
+            
             #Listen for ESC key
-            c = cv.WaitKey(7) % 0x100
+            c = cv.WaitKey(10)
+            #c = cv.WaitKey(7) % 0x100
             if c == 27:
                 break  
 
