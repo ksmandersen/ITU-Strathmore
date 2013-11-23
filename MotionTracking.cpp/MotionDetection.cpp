@@ -8,14 +8,11 @@
 
 #include "iostream"
 #include "stdlib.h"
+#include <vector>
 
 // OpenCV includes.
 #include<opencv\cv.h>
 #include<opencv\highgui.h>
-#
-//#pragma comment(lib,"cv.lib")
-//#pragma comment(lib,"cxcore.lib")
-//#pragma comment(lib,"highgui.lib")
 
 using namespace std;
 using namespace cv;
@@ -24,19 +21,18 @@ int main(int argc, char* argv[])
 {
 	//Create a new window.
 	cvNamedWindow("My Window", CV_WINDOW_AUTOSIZE);
+	cvNamedWindow("My Window2", CV_WINDOW_AUTOSIZE);
 
-	//Create a new movie capture object.
+	CvCapture *input;
+	//input = cvCaptureFromCAM(1);
+	input = cvCaptureFromFile("C:\\Users\\RasmusZimmer\\Desktop\\Video.mov");
 
-
-CvCapture *input;
-		input = cvCaptureFromCAM(1);
-
-		cvSetCaptureProperty(input, CV_CAP_PROP_FRAME_WIDTH, 1200); 
-		cvSetCaptureProperty(input, CV_CAP_PROP_FRAME_HEIGHT, 800); 
-	//Size of the image.
-	//CvSize imgSize;
-	//imgSize.width = 352;
-	//imgSize.height = 240;
+	if(!input){
+		std::cout << "cant read";
+		return 0;
+	}
+	//cvSetCaptureProperty(input, CV_CAP_PROP_FRAME_WIDTH, 320); 
+	//cvSetCaptureProperty(input, CV_CAP_PROP_FRAME_HEIGHT, 240); 
 
 	//Size of the image.
 	IplImage* frame = cvQueryFrame(input);
@@ -55,7 +51,7 @@ CvCapture *input;
 
 	//Points for the edges of the rectangle.
 	CvPoint pt1, pt2;
-
+	vector<CvPoint> points;
 	//Create a font object.
 	CvFont font;
 
@@ -80,12 +76,13 @@ CvCapture *input;
 	int closestToRight = 320;
 
 	//Write the number of people counted at the top of the output frame.
-		cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.8, 0.8, 0, 2);
-
+	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.8, 0.8, 0, 2);
+	int frameCounter = 0;
 	//Keep processing frames...
 	for(;;)
 	{
-		
+		frameCounter++;
+		std::cout << "frames: " << frameCounter;
 		//Get a frame from the input video.
 		colourImage = cvQueryFrame(input);
 
@@ -137,88 +134,55 @@ CvCapture *input;
 			ii+=1;
 			//Get a bounding rectangle around the moving object.
 			bndRect = cvBoundingRect(contour, 0);
-
+			
 			pt1.x = bndRect.x;
 			pt1.y = bndRect.y;
 			pt2.x = bndRect.x + bndRect.width;
 			pt2.y = bndRect.y + bndRect.height;
 
-			////Get an average X position of the moving contour.
-			//avgX = (pt1.x + pt2.x) / 2;
-
-			////If the contour is within the edges of the building...
-			//if(avgX > 90 && avgX < 250)
+			//if(ii == 1)
 			//{
-			//	//If the the previous contour was within 2 of the left boundary...
-			//	if(closestToLeft >= 88 && closestToLeft <= 90)
-			//	{
-			//		//If the current X position is greater than the previous...
-			//		if(avgX > prevX)
-			//		{
-			//			//Increase the number of people.
-			//			numPeople++;
-
-			//			//Reset the closest object to the left indicator.
-			//			closestToLeft = 0;
-			//		}
-			//	}
-			//	//else if the previous contour was within 2 of the right boundary...
-			//	else if(closestToRight >= 250 && closestToRight <= 252)
-			//	{
-			//		//If the current X position is less than the previous...
-			//		if(avgX < prevX)
-			//		{
-			//			//Increase the number of people.
-			//			numPeople++;
-
-			//			//Reset the closest object to the right counter.
-			//			closestToRight = 320;
-			//		}
-			//	}
+			//	points.push_back(pt1);
+			//}
 			
-				//Draw the bounding rectangle around the moving object.
-				cvRectangle(colourImage, pt1, pt2, CV_RGB(255,0,0), 1);
-				string s = to_string(ii);
-				const char * c = s.c_str();
-				CvPoint textPoint = pt1;
-				textPoint.y -= 10;
-				cvPutText(colourImage, c, textPoint, &font, cvScalar(0, 0, 300));
-			//}
-
-			//If the current object is closer to the left boundary but still not across
-			//it, then change the closest to the left counter to this value.
-			//if(avgX > closestToLeft && avgX <= 90)
-			//{
-			//	closestToLeft = avgX;
-			//}
-
-			////If the current object is closer to the right boundary but still not across
-			////it, then change the closest to the right counter to this value.
-			//if(avgX < closestToRight && avgX >= 250)
-			//{
-			//	closestToRight = avgX;
-			//}
-
-			////Save the current X value to use as the previous in the next iteration.
-			//prevX = avgX; 
+				
+			
+			//Draw the bounding rectangle around the moving object.
+			cvRectangle(colourImage, pt1, pt2, CV_RGB(255,0,0), 1);
+			string s = to_string(ii);
+			const char * c = s.c_str();
+			CvPoint textPoint = pt1;
+			textPoint.y -= 10;
+			cvPutText(colourImage, c, textPoint, &font, cvScalar(0, 0, 300));
 		}
 
+		/*if(points.size() > 1){
+
+		for(int i = 1; i < points.size(); i++)
+		{
+			cvLine(colourImage, points[i], points[i-1], CV_RGB(255,0,0), 1);
+		}
+
+		}*/
 		//Show the frame.
 		cvShowImage("My Window", colourImage);
+		cvShowImage("My Window2", difference);
 
-		//Wait for the user to see it.
-		cvWaitKey(10);
-		}
-
-		// Destroy the image, movies, and window.
-		cvReleaseImage(&temp);
-		cvReleaseImage(&difference);
-		cvReleaseImage(&greyImage);
-		cvReleaseImage(&movingAverage);
-		cvDestroyWindow("My Window");
-		cvReleaseCapture(&input);
 		
-		return 0;
-
+		//Wait for the user to see it.
+		cvWaitKey(1);
 	}
+
+	// Destroy the image, movies, and window.
+	cvReleaseImage(&temp);
+	cvReleaseImage(&difference);
+	cvReleaseImage(&greyImage);
+	cvReleaseImage(&movingAverage);
+	cvDestroyWindow("My Window");
+	cvReleaseCapture(&input);
+
+	
+	return 0;
+
+}
 
