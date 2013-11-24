@@ -137,6 +137,18 @@
           }
         }
       },
+      "ObservationCollection" : {
+        "id" : "ObservationCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Observation"
+            }
+          }
+        }
+      },
       "CollectionResponse_Observation" : {
         "id" : "CollectionResponse_Observation",
         "type" : "object",
@@ -159,7 +171,7 @@
           "$ref" : "ObservationListContainer"
         },
         "response" : {
-          "$ref" : "CollectionResponse_Observation"
+          "$ref" : "ObservationCollection"
         }
       },
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservation" : {
