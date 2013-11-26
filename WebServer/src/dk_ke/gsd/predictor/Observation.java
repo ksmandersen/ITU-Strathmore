@@ -15,7 +15,8 @@ public class Observation {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long objectId;
-	private Long captureDate;
+	private Long unixCaptureTimestap;
+	private Date captureDate;
 	private boolean occupancy;
 	
 	@Enumerated(EnumType.STRING)
@@ -28,10 +29,17 @@ public class Observation {
 		this.objectId = objectId;
 	}
 		
-	public Long getCaptureDate() {
+	public Long getUnixCaptureTimestap() {
+		return unixCaptureTimestap;
+	}
+	public void setUnixCaptureTimestap(Long unixCaptureTimestap) {
+		this.unixCaptureTimestap = unixCaptureTimestap;
+		setCaptureDate(new Date(unixCaptureTimestap*1000));
+	}
+	public Date getCaptureDate() {
 		return captureDate;
 	}
-	public void setCaptureDate(Long capture) {
+	public void setCaptureDate(Date capture) {
 		this.captureDate = capture;
 	}
 	public boolean isOccupancy() {

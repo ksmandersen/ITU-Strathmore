@@ -152,9 +152,13 @@
             "type" : "string",
             "format" : "int64"
           },
-          "captureDate" : {
+          "unixCaptureTimestap" : {
             "type" : "string",
             "format" : "int64"
+          },
+          "captureDate" : {
+            "type" : "string",
+            "format" : "date-time"
           },
           "occupancy" : {
             "type" : "boolean"
