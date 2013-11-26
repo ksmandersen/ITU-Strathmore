@@ -1,0 +1,197 @@
+{
+  "extends" : "thirdParty.api",
+  "abstract" : false,
+  "root" : "https://itu-strath-occupancy.appspot.com/_ah/api",
+  "name" : "occupancyPredictionAPI",
+  "version" : "v1",
+  "defaultVersion" : false,
+  "adapter" : {
+    "bns" : "https://itu-strath-occupancy.appspot.com/_ah/spi",
+    "deadline" : 10.0,
+    "type" : "lily"
+  },
+  "auth" : {
+    "allowCookieAuth" : false
+  },
+  "frontendLimits" : {
+    "unregisteredUserQps" : -1,
+    "unregisteredQps" : -1,
+    "unregisteredDaily" : -1,
+    "rules" : [ ]
+  },
+  "cacheControl" : {
+    "type" : "no-cache",
+    "maxAge" : 0
+  },
+  "methods" : {
+    "occupancyPredictionAPI.addObservations" : {
+      "path" : "add_observations",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.addObservations",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "occupancyPredictionAPI.listObservations" : {
+      "path" : "observations",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservation",
+      "request" : {
+        "parameters" : {
+          "cursor" : {
+            "type" : "string",
+            "required" : false
+          },
+          "limit" : {
+            "type" : "int32",
+            "required" : false
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "occupancyPredictionAPI.getObservation" : {
+      "path" : "observation/{id}",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.getObservation",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int64",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "occupancyPredictionAPI.insertObservation" : {
+      "path" : "observation",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.insertObservation",
+      "request" : {
+        "body" : "autoTemplate(backendRequest)",
+        "bodyName" : "resource"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    }
+  },
+  "descriptor" : {
+    "schemas" : {
+      "ObservationListContainer" : {
+        "id" : "ObservationListContainer",
+        "type" : "object",
+        "properties" : {
+          "observationList" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Observation"
+            }
+          }
+        }
+      },
+      "Observation" : {
+        "id" : "Observation",
+        "type" : "object",
+        "properties" : {
+          "objectId" : {
+            "type" : "string",
+            "format" : "int64"
+          },
+          "captureDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "occupancy" : {
+            "type" : "boolean"
+          },
+          "camera" : {
+            "type" : "string"
+          }
+        }
+      },
+      "ObservationCollection" : {
+        "id" : "ObservationCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Observation"
+            }
+          }
+        }
+      },
+      "CollectionResponse_Observation" : {
+        "id" : "CollectionResponse_Observation",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Observation"
+            }
+          },
+          "nextPageToken" : {
+            "type" : "string"
+          }
+        }
+      }
+    },
+    "methods" : {
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.addObservations" : {
+        "request" : {
+          "$ref" : "ObservationListContainer"
+        },
+        "response" : {
+          "$ref" : "ObservationCollection"
+        }
+      },
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservation" : {
+        "response" : {
+          "$ref" : "CollectionResponse_Observation"
+        }
+      },
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.getObservation" : {
+        "response" : {
+          "$ref" : "Observation"
+        }
+      },
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.insertObservation" : {
+        "request" : {
+          "$ref" : "Observation"
+        },
+        "response" : {
+          "$ref" : "Observation"
+        }
+      }
+    }
+  }
+}
