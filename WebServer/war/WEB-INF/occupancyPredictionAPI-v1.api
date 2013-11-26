@@ -133,9 +133,14 @@
             "type" : "boolean"
           },
           "camera" : {
-            "type" : "string"
+            "$ref" : "Camera"
           }
         }
+      },
+      "Camera" : {
+        "id" : "Camera",
+        "type" : "string",
+        "enum" : [ "CAM_01", "CAM_02" ]
       },
       "ObservationCollection" : {
         "id" : "ObservationCollection",
