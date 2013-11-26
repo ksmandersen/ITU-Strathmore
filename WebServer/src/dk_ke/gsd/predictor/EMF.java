@@ -1,5 +1,6 @@
 package dk_ke.gsd.predictor;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
@@ -9,8 +10,8 @@ public final class EMF {
 
 	private EMF() {
 	}
-
-	public static EntityManagerFactory get() {
-		return emfInstance;
+	
+	public static EntityManager getEntityManager() {
+		return emfInstance.createEntityManager();
 	}
 }
