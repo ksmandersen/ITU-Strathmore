@@ -24,6 +24,21 @@
     "maxAge" : 0
   },
   "methods" : {
+    "occupancyPredictionAPI.uploadUrl" : {
+      "path" : "upload/url",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.getUploadUrl",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "occupancyPredictionAPI.addObservations" : {
       "path" : "add_observations",
       "httpMethod" : "POST",
@@ -105,6 +120,18 @@
   },
   "descriptor" : {
     "schemas" : {
+      "StringCollection" : {
+        "id" : "StringCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
       "ObservationListContainer" : {
         "id" : "ObservationListContainer",
         "type" : "object",
@@ -127,7 +154,7 @@
           },
           "captureDate" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "int64"
           },
           "occupancy" : {
             "type" : "boolean"
@@ -171,6 +198,11 @@
       }
     },
     "methods" : {
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.getUploadUrl" : {
+        "response" : {
+          "$ref" : "StringCollection"
+        }
+      },
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.addObservations" : {
         "request" : {
           "$ref" : "ObservationListContainer"

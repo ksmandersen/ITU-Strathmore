@@ -12,4 +12,20 @@
   <servlet-name>SystemServiceServlet</servlet-name>
   <url-pattern>/_ah/spi/*</url-pattern>
  </servlet-mapping>
+ <servlet>
+    <servlet-name>UploadBlob-servlet</servlet-name>
+    <servlet-class>dk_ke.gsd.servlets.Upload</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadBlob-servlet</servlet-name>
+    <url-pattern>/blob/upload</url-pattern>
+  </servlet-mapping>
+   <servlet>
+    <servlet-name>ServeBlob-servlet</servlet-name>
+    <servlet-class>dk_ke.gsd.servlets.Serve</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ServeBlob-servlet</servlet-name>
+    <url-pattern>/serve</url-pattern>
+  </servlet-mapping>
 </web-app>

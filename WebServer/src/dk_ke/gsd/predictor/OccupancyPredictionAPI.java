@@ -8,13 +8,15 @@ import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.CollectionResponse;
 import com.google.appengine.api.datastore.Cursor;
 import com.google.appengine.datanucleus.query.JPACursorHelper;
+import com.google.appengine.api.blobstore.BlobstoreService;
+import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.inject.Named;
 import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
@@ -115,8 +117,7 @@ public class OccupancyPredictionAPI {
 		}
 		return observation;
 	}
-	
-	
+		
 	@ApiMethod(name = "addObservations", path="add_observations", httpMethod=HttpMethod.POST )
 	public List<Observation> addObservations(ObservationListContainer observationList) {
 		List<Observation> observations = observationList.getObservationList();
@@ -134,6 +135,15 @@ public class OccupancyPredictionAPI {
 			}
 		}	
 		return observations;
+	}
+
+	@ApiMethod(name = "uploadUrl", path="upload/url", httpMethod=HttpMethod.GET )
+	public List<String> getUploadUrl() {
+		BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+		String blobUploadUrl = blobstoreService.createUploadUrl("/blob/upload");
+		ArrayList<String> al = new ArrayList<String>();
+		al.add(blobUploadUrl);
+		return al;
 	}
 	
 	private boolean containsObservation(Observation observation) {
