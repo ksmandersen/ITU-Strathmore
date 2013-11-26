@@ -117,24 +117,23 @@ public class OccupancyPredictionAPI {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	@ApiMethod(name = "addObservations", path="add_observations", httpMethod=HttpMethod.POST )
-	public CollectionResponse<Observation> addObservations(ObservationListContainer observationList) {
+	public List<Observation> addObservations(ObservationListContainer observationList) {
 		List<Observation> observations = observationList.getObservationList();
-		EntityManager mgr = getEntityManager();
-		try {
-			for (Observation obs : observations) {
+		EntityManager mgr = null; 
+		
+		for (Observation obs : observations) {
+			try {
+				mgr = getEntityManager();
 				if (containsObservation(obs)) {
 					throw new EntityExistsException("Object already exists");
 				}
 				mgr.persist(obs);
-			}	
-		} finally {
-			mgr.close();
-		}
-		
-		return (CollectionResponse<Observation>)observations;
-		
+			} finally {
+				mgr.close();
+			}
+		}	
+		return observations;
 	}
 	
 	private boolean containsObservation(Observation observation) {
