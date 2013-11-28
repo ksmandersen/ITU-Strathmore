@@ -88,6 +88,33 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
+    "occupancyPredictionAPI.listProbabilities" : {
+      "path" : "probability",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.listProbabilities",
+      "request" : {
+        "parameters" : {
+          "camera" : {
+            "enum" : {
+              "CAM_01" : {
+              },
+              "CAM_02" : {
+              }
+            },
+            "type" : "string",
+            "required" : false
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "occupancyPredictionAPI.listObservationsByDayOfWeek" : {
       "path" : "observations_by_day_of_week",
       "httpMethod" : "GET",
@@ -100,7 +127,7 @@
         "parameters" : {
           "dayOfWeek" : {
             "type" : "int32",
-            "required" : false
+            "required" : true
           },
           "cursor" : {
             "type" : "string",
@@ -236,6 +263,55 @@
             "type" : "string"
           }
         }
+      },
+      "CollectionResponse_Probability" : {
+        "id" : "CollectionResponse_Probability",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Probability"
+            }
+          },
+          "nextPageToken" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Probability" : {
+        "id" : "Probability",
+        "type" : "object",
+        "properties" : {
+          "snapshotDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "camera" : {
+            "$ref" : "Camera"
+          },
+          "monday" : {
+            "type" : "number"
+          },
+          "tuesday" : {
+            "type" : "number"
+          },
+          "wednesday" : {
+            "type" : "number"
+          },
+          "thursday" : {
+            "type" : "number"
+          },
+          "friday" : {
+            "type" : "number"
+          },
+          "saturday" : {
+            "type" : "number"
+          },
+          "sunday" : {
+            "type" : "number"
+          }
+        }
       }
     },
     "methods" : {
@@ -255,6 +331,11 @@
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservation" : {
         "response" : {
           "$ref" : "CollectionResponse_Observation"
+        }
+      },
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.listProbabilities" : {
+        "response" : {
+          "$ref" : "CollectionResponse_Probability"
         }
       },
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservationByDayOfWeek" : {
