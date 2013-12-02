@@ -28,4 +28,12 @@
     <servlet-name>ServeBlob-servlet</servlet-name>
     <url-pattern>/serve</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <servlet-name>UploadURL-servlet</servlet-name>
+    <servlet-class>dk_ke.gsd.servlets.UploadURL</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadURL-servlet</servlet-name>
+    <url-pattern>/upload/url</url-pattern>
+  </servlet-mapping>
 </web-app>
