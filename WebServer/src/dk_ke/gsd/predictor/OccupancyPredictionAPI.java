@@ -35,104 +35,31 @@ public class OccupancyPredictionAPI {
 	@ApiMethod(name = "listProbabilities", path = "probability")
 	public CollectionResponse<Probability> listProbabilities(
 
-	@Nullable @Named("camera") Camera camera) {
+	@Nullable @Named("camera") Camera camera,
+			@Nullable @Named("dayOfTheWeek") DayOfTheWeek dayOfTheWeek,
+			@Nullable @Named("timeOfDay") Integer timeOfDay) throws BadRequestException {
 
 		EntityManager mgr = null;
 		Cursor cursor = null;
 		List<Probability> result = null;
 		Query query = null;
 		
+		if (timeOfDay != null) {
+			if (timeOfDay < 0 || timeOfDay > 23) {
+				throw new BadRequestException("timeOfDay should be from 0-23");
+			}
+		}
+
 		try {
 			mgr = EMF.getEntityManager();
-
-			if (Queries.probabilityShouldBeRecalculated(camera, mgr)) {
-				result = Queries.createAndReturnUpdatedProbabilities(camera, mgr);
-			} else {
-				result = Queries.returnLatestProbabilities(camera, mgr);
-			}
+			result = Queries.createAndReturnUpdatedProbabilities(camera,
+					dayOfTheWeek, timeOfDay, mgr);
 
 		} finally {
 			mgr.close();
 		}
 
-		return CollectionResponse.<Probability> builder().setItems(result).build();
-	}
-
-	/**
-	 * This method lists all the entities inserted in datastore having the
-	 * specified day of week. It uses HTTP GET method and paging support.
-	 * 
-	 * @return A CollectionResponse class containing the list of all entities
-	 *         persisted and a cursor to the next page.
-	 * @throws BadRequestException
-	 */
-	@SuppressWarnings({ "unchecked", "unused" })
-	@ApiMethod(name = "listObservationsByDayOfWeek", path = "observations_by_day_of_week")
-	public CollectionResponse<Observation> listObservationByDayOfWeek(
-
-	@Named("dayOfWeek") Integer day,
-			@Nullable @Named("cursor") String cursorString,
-			@Nullable @Named("limit") Integer limit) throws BadRequestException {
-
-		EntityManager mgr = null;
-		Cursor cursor = null;
-		List<Observation> filteredResultList = null;
-		Query query = null;
-
-		try {
-			mgr = EMF.getEntityManager();
-			log.log(Level.INFO, "Starting query");
-			long startTime = System.currentTimeMillis();
-			if (day >= 1 && day <= 7) {
-
-				query = mgr
-						.createQuery("select from Observation as Observation");
-			} else {
-				throw new BadRequestException(
-						day
-								+ " is not a valid weekday, days range from 1-7 (Sunday = 1, Saturday = 7");
-			}
-
-			if (cursorString != null && cursorString != "") {
-				cursor = Cursor.fromWebSafeString(cursorString);
-				query.setHint(JPACursorHelper.CURSOR_HINT, cursor);
-			}
-
-			if (limit != null && limit < RESULT_HARD_LIMIT) {
-				query.setMaxResults(limit);
-			} else {
-				log.log(Level.WARNING,
-						"Limit larger than accepted hard limit. Server will use hard limit: "
-								+ RESULT_HARD_LIMIT);
-				query.setMaxResults(RESULT_HARD_LIMIT);
-				query.setFirstResult(0);
-			}
-
-			// Filter by day
-			List<Observation> resultList = query.getResultList();
-			filteredResultList = Queries.filterObservationsByDayOfWeek(day,
-					resultList);
-
-			long endTime = System.currentTimeMillis();
-			log.log(Level.INFO, "Query finished after " + (endTime - startTime)
-					+ " milliseconds");
-			log.log(Level.INFO, "Resultset size: " + filteredResultList.size());
-
-			cursor = JPACursorHelper.getCursor(filteredResultList);
-			if (cursor != null)
-				cursorString = cursor.toWebSafeString();
-
-			// Tight loop for fetching all entities from datastore and
-			// accomodate
-			// for lazy fetch.
-			for (Observation obj : filteredResultList)
-				;
-
-		} finally {
-			mgr.close();
-		}
-		return CollectionResponse.<Observation> builder()
-				.setItems(filteredResultList).setNextPageToken(cursorString)
+		return CollectionResponse.<Probability> builder().setItems(result)
 				.build();
 	}
 

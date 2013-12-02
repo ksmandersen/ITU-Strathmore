@@ -107,33 +107,28 @@
             },
             "type" : "string",
             "required" : false
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "occupancyPredictionAPI.listObservationsByDayOfWeek" : {
-      "path" : "observations_by_day_of_week",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
-      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservationByDayOfWeek",
-      "request" : {
-        "parameters" : {
-          "dayOfWeek" : {
-            "type" : "int32",
-            "required" : true
           },
-          "cursor" : {
+          "dayOfTheWeek" : {
+            "enum" : {
+              "søndag" : {
+              },
+              "mandag" : {
+              },
+              "tirsdag" : {
+              },
+              "onsdag" : {
+              },
+              "torsdag" : {
+              },
+              "fredag" : {
+              },
+              "lørdag" : {
+              }
+            },
             "type" : "string",
             "required" : false
           },
-          "limit" : {
+          "timeOfDay" : {
             "type" : "int32",
             "required" : false
           }
@@ -224,6 +219,12 @@
             "type" : "string",
             "format" : "date-time"
           },
+          "day" : {
+            "$ref" : "DayOfTheWeek"
+          },
+          "timeOfDay" : {
+            "type" : "integer"
+          },
           "occupancy" : {
             "type" : "boolean"
           },
@@ -231,6 +232,11 @@
             "$ref" : "Camera"
           }
         }
+      },
+      "DayOfTheWeek" : {
+        "id" : "DayOfTheWeek",
+        "type" : "string",
+        "enum" : [ "søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag" ]
       },
       "Camera" : {
         "id" : "Camera",
@@ -290,25 +296,13 @@
           "camera" : {
             "$ref" : "Camera"
           },
-          "monday" : {
-            "type" : "number"
+          "day" : {
+            "$ref" : "DayOfTheWeek"
           },
-          "tuesday" : {
-            "type" : "number"
+          "timeOfday" : {
+            "type" : "integer"
           },
-          "wednesday" : {
-            "type" : "number"
-          },
-          "thursday" : {
-            "type" : "number"
-          },
-          "friday" : {
-            "type" : "number"
-          },
-          "saturday" : {
-            "type" : "number"
-          },
-          "sunday" : {
+          "probabilityOfOccupancy" : {
             "type" : "number"
           }
         }
@@ -336,11 +330,6 @@
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.listProbabilities" : {
         "response" : {
           "$ref" : "CollectionResponse_Probability"
-        }
-      },
-      "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservationByDayOfWeek" : {
-        "response" : {
-          "$ref" : "CollectionResponse_Observation"
         }
       },
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.getObservation" : {
