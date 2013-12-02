@@ -1,5 +1,6 @@
 package dk_ke.gsd.predictor;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -17,6 +18,10 @@ public class Observation {
     private Long objectId;
 	private Long unixCaptureTimestap;
 	private Date captureDate;
+	
+	@Enumerated(EnumType.STRING)
+	private DayOfTheWeek day;
+	private int timeOfDay;
 	private boolean occupancy;
 	
 	@Enumerated(EnumType.STRING)
@@ -35,6 +40,10 @@ public class Observation {
 	public void setUnixCaptureTimestap(Long unixCaptureTimestap) {
 		this.unixCaptureTimestap = unixCaptureTimestap;
 		setCaptureDate(new Date(unixCaptureTimestap*1000));
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(getCaptureDate());
+		setDay(DayOfTheWeek.fromCalendarDay(cal.get(Calendar.DAY_OF_WEEK)));
+		setTimeOfDay(cal.get(Calendar.HOUR_OF_DAY));
 	}
 	public Date getCaptureDate() {
 		return captureDate;
@@ -53,5 +62,17 @@ public class Observation {
 	}
 	public void setCamera(Camera camera) {
 	    this.camera = camera;
+	}
+	public DayOfTheWeek getDay() {
+		return day;
+	}
+	public void setDay(DayOfTheWeek day) {
+		this.day = day;
+	}
+	public int getTimeOfDay() {
+		return timeOfDay;
+	}
+	public void setTimeOfDay(int timeOfDay) {
+		this.timeOfDay = timeOfDay;
 	}
 }
