@@ -2,8 +2,8 @@ import requests
 import datetime
 
 timestamp = datetime.datetime.utcnow().strftime('%s')
-#url = "http://localhost:8888/upload/url"
-url = "https://itu-strath-occupancy.appspot.com/upload/url"
+url = "http://localhost:8888/images/upload_url"
+#url = "https://itu-strath-occupancy.appspot.com/upload/url"
 
 data = {'room-id': 'CAM_01', 'date': timestamp }
 r = requests.get(url, params=data)

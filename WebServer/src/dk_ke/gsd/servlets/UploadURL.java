@@ -22,10 +22,7 @@ public class UploadURL extends HttpServlet {
 	 	String roomId = req.getParameter("room-id");
 	 	String timestamp = req.getParameter("date");
 	 	//TODO Crash if there is no roomId or timestamp
-		String blobUploadUrl = blobstoreService.createUploadUrl("/blob/upload?room-id="+roomId+"&date="+timestamp);
-		
-//		String blobUploadUrl = blobstoreService.createUploadUrl("/blob/upload");
-		
+		String blobUploadUrl = blobstoreService.createUploadUrl("/images/blob_upload?room-id="+roomId+"&date="+timestamp);
 		JSONObject json = new JSONObject();
 		try {
 			json.put("url", blobUploadUrl);

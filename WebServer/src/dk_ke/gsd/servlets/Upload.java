@@ -26,20 +26,11 @@ public class Upload extends HttpServlet {
 @Override
  public void doPost(HttpServletRequest req, HttpServletResponse res)
      throws ServletException, IOException {
-
 	 Camera camera = Camera.valueOf(req.getParameter("room-id"));
 	 Long timestamp = new Long(req.getParameter("date"));
-	 
 	 //TODO crash if no params set
-	 
 	 Map<String, BlobKey> blobs = blobstoreService.getUploadedBlobs(req);
 	 BlobKey blobKey = new ArrayList<BlobKey>(blobs.values()).get(0);
-	 
-	 System.out.println(blobKey.getKeyString());
-	 System.out.println("ROOM ID: " + camera + " TIMESTAMP: " + timestamp + " BLOBKEY: " + blobKey);
-	 
-//	 Camera camera = Camera.valueOf("CAM_01");
-//	 Long timestamp = (long) 1385999685;
 	 Image img = new Image(camera, timestamp, blobKey);
 	 EntityManager mgr = EMF.getEntityManager();
 	 try {
@@ -47,8 +38,5 @@ public class Upload extends HttpServlet {
 	 } finally {
 		 mgr.close();
 	 }
-	 
-	 System.out.println(img.getBlobKey());
-	 System.out.println(img.getCaptureDate());
  }
 }
