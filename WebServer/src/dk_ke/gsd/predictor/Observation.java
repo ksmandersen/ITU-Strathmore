@@ -22,6 +22,7 @@ public class Observation {
 	@Enumerated(EnumType.STRING)
 	private DayOfTheWeek day;
 	private int timeOfDay;
+	private int maxContoursDetected;
 	private boolean occupancy;
 	
 	@Enumerated(EnumType.STRING)
@@ -74,5 +75,11 @@ public class Observation {
 	}
 	public void setTimeOfDay(int timeOfDay) {
 		this.timeOfDay = timeOfDay;
+	}
+	public int getMaxContoursDetected() {
+		return maxContoursDetected;
+	}
+	public void setMaxContoursDetected(int maxContoursDetected) {
+		this.maxContoursDetected = maxContoursDetected;
 	}
 }
