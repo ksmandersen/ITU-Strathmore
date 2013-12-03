@@ -61,17 +61,19 @@ class Target:
         # Capture first frame to get size
         frame = cv.QueryFrame(self.capture)
         frame_size = cv.GetSize(frame)
-        print frame_size
-        color_image = cv.CreateImage(cv.GetSize(frame), 8, 3)
-        grey_image = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_8U, 1)
-        moving_average = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_32F, 3)
+        new_size = ( frame_size[0] / 2, frame_size[1] / 2)
+        color_image = cv.CreateImage(new_size, 8, 3)
+        grey_image = cv.CreateImage(new_size, cv.IPL_DEPTH_8U, 1)
+        moving_average = cv.CreateImage(new_size, cv.IPL_DEPTH_32F, 3)
         font = cv.InitFont(cv.CV_FONT_HERSHEY_COMPLEX_SMALL, 1, 1, 0, 1, 1)
         first = True
-        k = 0
+        k = 0        
         while True:
             k+=1
-            color_image = cv.QueryFrame(self.capture)
 
+            captured_image = cv.QueryFrame(self.capture)
+            color_image = cv.CreateImage(new_size, captured_image.depth, captured_image.nChannels)
+            cv.Resize(captured_image, color_image)
             # Smooth to get rid of false positives
             cv.Smooth(color_image, color_image, cv.CV_GAUSSIAN, 3, 0)
 
