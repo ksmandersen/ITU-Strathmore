@@ -23,17 +23,19 @@ public class Serve extends HttpServlet {
  	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
 	   EntityManager mgr = null;
-	   List<Image> images = null;
+	   Image img = null;
 	   try {
 		 String camera = req.getParameter("room-id");
 		 mgr = EMF.getEntityManager();
-		 Query query = mgr.createQuery("SELECT i FROM Image i where i.camera = :camera", Image.class);
+		 Query query = mgr.createQuery("SELECT i FROM Image i where i.camera = :camera ORDER BY captureTimestamp DESC", Image.class);
 		 query.setParameter("camera", camera);
-		 images = (List<Image>) query.getResultList();
+		 query.setMaxResults(1);
+		 
+		 img = (Image)query.getSingleResult();
 		 } finally {
 			 mgr.close();
 		 }
-		 Image img = images.get(0); 
+		  
 		 BlobKey blobKey = img.getBlobKey();
 	     blobstoreService.serve(blobKey, res);
      }    
