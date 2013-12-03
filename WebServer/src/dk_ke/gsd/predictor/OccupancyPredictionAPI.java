@@ -11,6 +11,10 @@ import javax.inject.Named;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -31,6 +35,11 @@ public class OccupancyPredictionAPI {
 			.getLogger(OccupancyPredictionAPI.class.getName());
 	private static final int RESULT_HARD_LIMIT = 10000;
 
+	private boolean present(Object obj) {
+		return (obj != null);
+	}
+	
+	@SuppressWarnings({ "unused" })
 	@ApiMethod(name = "listAllProbabilities", path = "all_probabilities")
 	public CollectionResponse<ProbabilityContainer> listAllProbabilities(
 
@@ -51,12 +60,10 @@ public class OccupancyPredictionAPI {
 	@SuppressWarnings({ "unused" })
 	@ApiMethod(name = "getProbability", path = "probability")
 	public CollectionResponse<Probability> getProbability(
-
-	@Nullable @Named("camera") Camera camera,
+			@Nullable @Named("camera") Camera camera,
 			@Nullable @Named("dayOfTheWeek") DayOfTheWeek dayOfTheWeek,
 			@Nullable @Named("timeOfDay") Integer timeOfDay)
-			throws BadRequestException {
-
+					throws BadRequestException {
 		EntityManager mgr = null;
 		Cursor cursor = null;
 		List<Probability> result = null;
@@ -91,11 +98,8 @@ public class OccupancyPredictionAPI {
 	@SuppressWarnings({ "unchecked", "unused" })
 	@ApiMethod(name = "listObservations", path = "observations")
 	public CollectionResponse<Observation> listObservation(
-
-	@Nullable @Named("dateTimeFrom") Date from,
-			@Nullable @Named("dateTimeTo") Date to,
-			@Nullable @Named("cursor") String cursorString,
-			@Nullable @Named("limit") Integer limit) {
+			@Nullable @Named("dateTimeFrom") Date from,
+			@Nullable @Named("dateTimeTo") Date to) {
 
 		EntityManager mgr = null;
 		Cursor cursor = null;
@@ -103,49 +107,34 @@ public class OccupancyPredictionAPI {
 		Query query = null;
 		try {
 			mgr = EMF.getEntityManager();
-			if (from != null && to == null) {
-				query = Queries.getObservationsFromDate(from, mgr);
-			} else if (from == null && to != null) {
-				query = Queries.getObservationsBeforeDate(to, mgr);
-			} else if (from != null && to != null) {
-				query = Queries.getObservationsBetweenDates(from, to, mgr);
-			} else {
-				query = mgr
-						.createQuery("select from Observation as Observation");
-			}
+			CriteriaBuilder cb = mgr.getCriteriaBuilder();
+	        CriteriaQuery<Observation> cq = cb.createQuery(Observation.class);
+	        Root<Observation> observation = cq.from(Observation.class);
+	        cq.select(observation);	        
 
-			if (cursorString != null && cursorString != "") {
-				cursor = Cursor.fromWebSafeString(cursorString);
-				query.setHint(JPACursorHelper.CURSOR_HINT, cursor);
-			}
+	        ArrayList<Predicate> predicates = new ArrayList<Predicate>();
+	        if (present(from)) {
+	        	predicates.add(cb.greaterThanOrEqualTo(observation.<Date>get("captureDate"), from));	
+	        }
+	        if (present(to)) {
+	        	predicates.add(cb.lessThanOrEqualTo(observation.<Date>get("captureDate"), to));
+	        }
+	        cq.where(predicates.toArray(new Predicate[predicates.size()]));
 
-			if (limit != null && limit < RESULT_HARD_LIMIT) {
-				query.setMaxResults(limit);
-			} else {
-				log.log(Level.WARNING,
-						"Limit larger than accepted hard limit. Server will use hard limit: "
-								+ RESULT_HARD_LIMIT);
-				query.setMaxResults(RESULT_HARD_LIMIT);
-			}
 
-			query.setFirstResult(0);
-			execute = (List<Observation>) query.getResultList();
+	        query = mgr.createQuery(cq);
+	        execute = (List<Observation>) query.getResultList(); 
+			
+			
 			log.log(Level.INFO, "Resultset size: " + execute.size());
-			cursor = JPACursorHelper.getCursor(execute);
-			if (cursor != null)
-				cursorString = cursor.toWebSafeString();
-
 			// Tight loop for fetching all entities from datastore and
-			// accomodate
-			// for lazy fetch.
+			// accomodate for lazy fetch.
 			for (Observation obj : execute)
 				;
 		} finally {
 			mgr.close();
 		}
-
-		return CollectionResponse.<Observation> builder().setItems(execute)
-				.setNextPageToken(cursorString).build();
+		return CollectionResponse.<Observation> builder().setItems(execute).build();
 	}
 
 	/**

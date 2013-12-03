@@ -72,14 +72,6 @@
           "dateTimeTo" : {
             "type" : "datetime",
             "required" : false
-          },
-          "cursor" : {
-            "type" : "string",
-            "required" : false
-          },
-          "limit" : {
-            "type" : "int32",
-            "required" : false
           }
         },
         "body" : "empty"
@@ -131,19 +123,19 @@
           },
           "dayOfTheWeek" : {
             "enum" : {
-              "søndag" : {
+              "Sunday" : {
               },
-              "mandag" : {
+              "Monday" : {
               },
-              "tirsdag" : {
+              "Tuesday" : {
               },
-              "onsdag" : {
+              "Wednesday" : {
               },
-              "torsdag" : {
+              "Thursday" : {
               },
-              "fredag" : {
+              "Friday" : {
               },
-              "lørdag" : {
+              "Saturday" : {
               }
             },
             "type" : "string",
@@ -266,7 +258,7 @@
       "DayOfTheWeek" : {
         "id" : "DayOfTheWeek",
         "type" : "string",
-        "enum" : [ "søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag" ]
+        "enum" : [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ]
       },
       "Camera" : {
         "id" : "Camera",
