@@ -211,7 +211,7 @@
             "type" : "string",
             "format" : "int64"
           },
-          "unixCaptureTimestap" : {
+          "unixCaptureTimestamp" : {
             "type" : "string",
             "format" : "int64"
           },
