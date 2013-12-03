@@ -20,7 +20,7 @@ class Target:
 
     def __init__(self):
 
-        self.capture = cv.CaptureFromCAM(1)
+        self.capture = cv.CaptureFromCAM(0)
         #self.capture = cv.CaptureFromFile("rasmus.mov")
         #TODO!
         #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320)
@@ -42,6 +42,20 @@ class Target:
 
         self.last_request = time.time()
         self.observed_occupancy = False
+
+    def send_image(self, image):
+        #Post an image 
+        timestamp = datetime.datetime.utcnow().strftime('%s')
+        filename = str(timestamp)+".png"
+        cv.SaveImage(filename, image)
+        #url = "http://localhost:8888/images/upload_url"
+        url = "https://itu-strath-occupancy.appspot.com/images/upload_url"
+        data = { 'camera': 'CAM_02', 'date': timestamp }
+        request_upload_url = requests.get(url, params=data)
+        upload_url = str(request_upload_url.json()['url'])
+        print upload_url
+        files = {'file': open(filename, 'rb')}
+        r2 = requests.post(upload_url, files=files) 
 
     def run(self):
         # Capture first frame to get size
@@ -153,6 +167,7 @@ class Target:
             request_threshold = 60
             if time_passed > request_threshold:
                 self.send_occupancy()
+                self.send_image(color_image)
             
             
             #Listen for ESC key
