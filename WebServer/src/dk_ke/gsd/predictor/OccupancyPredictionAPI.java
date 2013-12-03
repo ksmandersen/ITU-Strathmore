@@ -32,18 +32,42 @@ public class OccupancyPredictionAPI {
 	private static final int RESULT_HARD_LIMIT = 10000;
 
 	@SuppressWarnings({ "unused" })
-	@ApiMethod(name = "listProbabilities", path = "probability")
-	public CollectionResponse<Probability> listProbabilities(
+	@ApiMethod(name = "listAllProbabilities", path = "all_probabilities")
+	public CollectionResponse<ProbabilityContainer> listAllProbabilities(
+
+	@Named("camera") Camera camera) throws BadRequestException {
+
+		EntityManager mgr = null;
+		Cursor cursor = null;
+		List<ProbabilityContainer> result = null;
+		Query query = null;
+
+		try {
+			mgr = EMF.getEntityManager();
+			result = Queries.returnAllProbabilities(camera, mgr);
+
+		} finally {
+			mgr.close();
+		}
+
+		return CollectionResponse.<ProbabilityContainer> builder().setItems(result)
+				.build();
+	}
+
+	@SuppressWarnings({ "unused" })
+	@ApiMethod(name = "getProbability", path = "probability")
+	public CollectionResponse<Probability> getProbability(
 
 	@Nullable @Named("camera") Camera camera,
 			@Nullable @Named("dayOfTheWeek") DayOfTheWeek dayOfTheWeek,
-			@Nullable @Named("timeOfDay") Integer timeOfDay) throws BadRequestException {
+			@Nullable @Named("timeOfDay") Integer timeOfDay)
+			throws BadRequestException {
 
 		EntityManager mgr = null;
 		Cursor cursor = null;
 		List<Probability> result = null;
 		Query query = null;
-		
+
 		if (timeOfDay != null) {
 			if (timeOfDay < 0 || timeOfDay > 23) {
 				throw new BadRequestException("timeOfDay should be from 0-23");
@@ -52,8 +76,8 @@ public class OccupancyPredictionAPI {
 
 		try {
 			mgr = EMF.getEntityManager();
-			result = Queries.createAndReturnUpdatedProbabilities(camera,
-					dayOfTheWeek, timeOfDay, mgr);
+			result = Queries.returnUpdatedProbabilities(camera, dayOfTheWeek,
+					timeOfDay, mgr);
 
 		} finally {
 			mgr.close();

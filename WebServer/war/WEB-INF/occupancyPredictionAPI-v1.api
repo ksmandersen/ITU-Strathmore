@@ -88,14 +88,62 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "occupancyPredictionAPI.listProbabilities" : {
+    "occupancyPredictionAPI.getObservation" : {
+      "path" : "observation/{id}",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.getObservation",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int64",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "occupancyPredictionAPI.listAllProbabilities" : {
+      "path" : "all_probabilities",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.listAllProbabilities",
+      "request" : {
+        "parameters" : {
+          "camera" : {
+            "enum" : {
+              "CAM_01" : {
+              },
+              "CAM_02" : {
+              }
+            },
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "occupancyPredictionAPI.getProbability" : {
       "path" : "probability",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
-      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.listProbabilities",
+      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.getProbability",
       "request" : {
         "parameters" : {
           "camera" : {
@@ -131,27 +179,6 @@
           "timeOfDay" : {
             "type" : "int32",
             "required" : false
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "occupancyPredictionAPI.getObservation" : {
-      "path" : "observation/{id}",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "390025593484.apps.googleusercontent.com" ],
-      "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.getObservation",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int64",
-            "required" : true
           }
         },
         "body" : "empty"
@@ -270,18 +297,40 @@
           }
         }
       },
-      "CollectionResponse_Probability" : {
-        "id" : "CollectionResponse_Probability",
+      "CollectionResponse_ProbabilityContainer" : {
+        "id" : "CollectionResponse_ProbabilityContainer",
         "type" : "object",
         "properties" : {
           "items" : {
             "type" : "array",
             "items" : {
-              "$ref" : "Probability"
+              "$ref" : "ProbabilityContainer"
             }
           },
           "nextPageToken" : {
             "type" : "string"
+          }
+        }
+      },
+      "ProbabilityContainer" : {
+        "id" : "ProbabilityContainer",
+        "type" : "object",
+        "properties" : {
+          "day" : {
+            "$ref" : "DayOfTheWeek"
+          },
+          "snapshotDate" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "camera" : {
+            "$ref" : "Camera"
+          },
+          "probabilities" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Probability"
+            }
           }
         }
       },
@@ -306,6 +355,21 @@
             "type" : "number"
           }
         }
+      },
+      "CollectionResponse_Probability" : {
+        "id" : "CollectionResponse_Probability",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Probability"
+            }
+          },
+          "nextPageToken" : {
+            "type" : "string"
+          }
+        }
       }
     },
     "methods" : {
@@ -327,14 +391,19 @@
           "$ref" : "CollectionResponse_Observation"
         }
       },
-      "dk_ke.gsd.predictor.OccupancyPredictionAPI.listProbabilities" : {
-        "response" : {
-          "$ref" : "CollectionResponse_Probability"
-        }
-      },
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.getObservation" : {
         "response" : {
           "$ref" : "Observation"
+        }
+      },
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.listAllProbabilities" : {
+        "response" : {
+          "$ref" : "CollectionResponse_ProbabilityContainer"
+        }
+      },
+      "dk_ke.gsd.predictor.OccupancyPredictionAPI.getProbability" : {
+        "response" : {
+          "$ref" : "CollectionResponse_Probability"
         }
       },
       "dk_ke.gsd.predictor.OccupancyPredictionAPI.insertObservation" : {
