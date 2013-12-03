@@ -12,11 +12,7 @@ import javax.persistence.Id;
 public class Probability {
 
 	private Date snapshotDate;
-	
-	@Enumerated(EnumType.STRING)
 	private Camera camera;
-	
-	@Enumerated(EnumType.STRING)
 	private DayOfTheWeek day;
 	private Integer timeOfday;
 	private Double probabilityOfOccupancy;
