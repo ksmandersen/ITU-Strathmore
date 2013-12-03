@@ -19,10 +19,10 @@ public class UploadURL extends HttpServlet {
  @Override
  public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException { 
 	 	BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
-	 	String roomId = req.getParameter("room-id");
+	 	String camera = req.getParameter("camera");
 	 	String timestamp = req.getParameter("date");
 	 	//TODO Crash if there is no roomId or timestamp
-		String blobUploadUrl = blobstoreService.createUploadUrl("/images/blob_upload?room-id="+roomId+"&date="+timestamp);
+		String blobUploadUrl = blobstoreService.createUploadUrl("/images/blob_upload?camera="+camera+"&date="+timestamp);
 		JSONObject json = new JSONObject();
 		try {
 			json.put("url", blobUploadUrl);

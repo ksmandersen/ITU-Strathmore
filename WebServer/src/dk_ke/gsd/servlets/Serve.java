@@ -25,7 +25,7 @@ public class Serve extends HttpServlet {
 	   EntityManager mgr = null;
 	   Image img = null;
 	   try {
-		 String camera = req.getParameter("room-id");
+		 String camera = req.getParameter("camera");
 		 mgr = EMF.getEntityManager();
 		 Query query = mgr.createQuery("SELECT i FROM Image i where i.camera = :camera ORDER BY captureTimestamp DESC", Image.class);
 		 query.setParameter("camera", camera);

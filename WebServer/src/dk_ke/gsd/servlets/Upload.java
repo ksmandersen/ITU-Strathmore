@@ -26,7 +26,7 @@ public class Upload extends HttpServlet {
 @Override
  public void doPost(HttpServletRequest req, HttpServletResponse res)
      throws ServletException, IOException {
-	 Camera camera = Camera.valueOf(req.getParameter("room-id"));
+	 Camera camera = Camera.valueOf(req.getParameter("camera"));
 	 Long timestamp = new Long(req.getParameter("date"));
 	 //TODO crash if no params set
 	 Map<String, BlobKey> blobs = blobstoreService.getUploadedBlobs(req);
