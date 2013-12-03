@@ -98,8 +98,8 @@ public class OccupancyPredictionAPI {
 	@SuppressWarnings({ "unchecked", "unused" })
 	@ApiMethod(name = "listObservations", path = "observations")
 	public CollectionResponse<Observation> listObservation(
-			@Nullable @Named("dateTimeFrom") Date from,
-			@Nullable @Named("dateTimeTo") Date to) {
+			@Nullable @Named("from") Date from,
+			@Nullable @Named("to") Date to) {
 
 		EntityManager mgr = null;
 		Cursor cursor = null;
@@ -120,7 +120,6 @@ public class OccupancyPredictionAPI {
 	        	predicates.add(cb.lessThanOrEqualTo(observation.<Date>get("captureDate"), to));
 	        }
 	        cq.where(predicates.toArray(new Predicate[predicates.size()]));
-
 
 	        query = mgr.createQuery(cq);
 	        execute = (List<Observation>) query.getResultList(); 

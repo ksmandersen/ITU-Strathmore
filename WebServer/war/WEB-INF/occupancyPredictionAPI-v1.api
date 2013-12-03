@@ -65,11 +65,11 @@
       "rosyMethod" : "dk_ke.gsd.predictor.OccupancyPredictionAPI.listObservation",
       "request" : {
         "parameters" : {
-          "dateTimeFrom" : {
+          "from" : {
             "type" : "datetime",
             "required" : false
           },
-          "dateTimeTo" : {
+          "to" : {
             "type" : "datetime",
             "required" : false
           }
