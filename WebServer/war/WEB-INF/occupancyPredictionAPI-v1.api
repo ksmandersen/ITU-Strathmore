@@ -158,19 +158,19 @@
           },
           "dayOfTheWeek" : {
             "enum" : {
-              "Sunday" : {
+              "søndag" : {
               },
-              "Monday" : {
+              "mandag" : {
               },
-              "Tuesday" : {
+              "tirsdag" : {
               },
-              "Wednesday" : {
+              "onsdag" : {
               },
-              "Thursday" : {
+              "torsdag" : {
               },
-              "Friday" : {
+              "fredag" : {
               },
-              "Saturday" : {
+              "lørdag" : {
               }
             },
             "type" : "string",
@@ -263,7 +263,7 @@
       "DayOfTheWeek" : {
         "id" : "DayOfTheWeek",
         "type" : "string",
-        "enum" : [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ]
+        "enum" : [ "søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag" ]
       },
       "Camera" : {
         "id" : "Camera",

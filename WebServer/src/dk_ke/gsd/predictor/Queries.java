@@ -57,9 +57,8 @@ public class Queries {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<Probability> returnUpdatedProbabilities(
-			Camera camera, DayOfTheWeek dayOfTheWeek, Integer timeOfDay,
-			EntityManager em) {
+	public static List<Probability> returnUpdatedProbabilities(Camera camera,
+			DayOfTheWeek dayOfTheWeek, Integer timeOfDay, EntityManager em) {
 
 		Calendar c = Calendar.getInstance();
 		Probability prob = new Probability();
@@ -117,63 +116,81 @@ public class Queries {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static List<ProbabilityContainer> returnAllProbabilities(Camera camera,
-			EntityManager em) {
-		
+	public static List<ProbabilityContainer> returnAllProbabilities(
+			Camera camera) {
+
 		List<ProbabilityContainer> returnList = new ArrayList<>();
 		Calendar c = Calendar.getInstance();
-		// For each day of the week
-		for (int i = 1; i <= 7; i++) {
-			// Create new ProbabilityContainer object and initialize known fields
-			ProbabilityContainer container = new ProbabilityContainer();
-			container.setSnapshotDate(c.getTime());
-			container.setCamera(camera);
-			container.setDay(DayOfTheWeek.fromCalendarDay(i));
-			List<Probability> probabilities = new ArrayList<>();
-			container.setProbabilities(probabilities);
-			// Initialize CriteriaBuilder object for the current day
-			CriteriaBuilder cb = em.getCriteriaBuilder();
-			CriteriaQuery<Observation> cq = cb.createQuery(Observation.class);
-			Root<Observation> observation = cq.from(Observation.class);
-			cq.select(observation);
-			cq.where(cb.equal(observation.get("camera"), camera));
-			cq.where(cb.equal(observation.get("day"), DayOfTheWeek.fromCalendarDay(i)));
-			// For each hour of the day
-			for (int j = 0; j <= 23; j++) {
-				cq.where(cb.equal(observation.get("timeOfDay"), j));
-				Query query = em.createQuery(cq);
-				List<Observation> observations = query.getResultList();
-				
-				// Calculate the probability of a true observation for a given hour of day
-				double totalObservations = observations.size();
-				double totalTrueObservations = 0;
-				for (Observation obs : observations) {
-					if (obs.isOccupancy()) {
-						totalTrueObservations++;
+		EntityManager em = null;
+		try {
+
+			// For each day of the week
+			for (int i = 1; i <= 7; i++) {
+				// Create new ProbabilityContainer object and initialize known
+				// fields
+				ProbabilityContainer container = new ProbabilityContainer();
+				container.setSnapshotDate(c.getTime());
+				container.setCamera(camera);
+				container.setDay(DayOfTheWeek.fromCalendarDay(i));
+				List<Probability> probabilities = new ArrayList<>();
+				container.setProbabilities(probabilities);
+
+				// For each hour of the day
+				for (int j = 0; j <= 23; j++) {
+					em = EMF.getEntityManager();
+					// Initialize CriteriaBuilder object for the current day
+					CriteriaBuilder cb = em.getCriteriaBuilder();
+					CriteriaQuery<Observation> cq = cb
+							.createQuery(Observation.class);
+					Root<Observation> observation = cq.from(Observation.class);
+					cq.select(observation);
+					cq.where(
+							cb.equal(observation.get("camera"), camera),
+							cb.equal(observation.get("day"),
+									DayOfTheWeek.fromCalendarDay(i)),
+							cb.equal(observation.get("timeOfDay"), j));
+					Query query = em.createQuery(cq);
+					List<Observation> observations = query.getResultList();
+					em.close();
+					log.log(Level.INFO,
+							"Resultset size for " + container.getDay() + " at "
+									+ j + ": " + observations.size());
+
+					// Calculate the probability of a true observation for a
+					// given
+					// hour of day
+					double totalObservations = observations.size();
+					double totalTrueObservations = 0;
+					for (Observation obs : observations) {
+						if (obs.isOccupancy()) {
+							totalTrueObservations++;
+						}
 					}
+
+					double probabilityAsDecimal = -1;
+					if (totalObservations > 0) {
+						probabilityAsDecimal = totalTrueObservations
+								/ totalObservations;
+					}
+
+					Probability prob = new Probability();
+					prob.setTimeOfday(j);
+					prob.setProbabilityOfOccupancy(probabilityAsDecimal);
+					probabilities.add(prob);
+
 				}
-				
-				double probabilityAsDecimal = -1;
-				if (totalObservations > 0) {
-					probabilityAsDecimal = totalTrueObservations / totalObservations;
-				}
-				
-				Probability prob = new Probability();
-				prob.setTimeOfday(j);
-				prob.setProbabilityOfOccupancy(probabilityAsDecimal);
-				probabilities.add(prob);
-				
+
+				returnList.add(container);
 			}
-			
-			returnList.add(container);
+
+		} finally {
+			// em.close();
 		}
-		
 		return returnList;
 	}
-	
+
 	private static boolean stringNotNullOrEmpty(Object obj) {
 		return (obj != null && ((String) obj).trim() != "");
 	}
-
 
 }

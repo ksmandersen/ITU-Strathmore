@@ -31,23 +31,17 @@ public class OccupancyPredictionAPI {
 			.getLogger(OccupancyPredictionAPI.class.getName());
 	private static final int RESULT_HARD_LIMIT = 10000;
 
-	@SuppressWarnings({ "unused" })
 	@ApiMethod(name = "listAllProbabilities", path = "all_probabilities")
 	public CollectionResponse<ProbabilityContainer> listAllProbabilities(
 
 	@Named("camera") Camera camera) throws BadRequestException {
 
-		EntityManager mgr = null;
-		Cursor cursor = null;
 		List<ProbabilityContainer> result = null;
-		Query query = null;
-
-		try {
-			mgr = EMF.getEntityManager();
-			result = Queries.returnAllProbabilities(camera, mgr);
-
-		} finally {
-			mgr.close();
+		
+		if (camera != null) {
+			result = Queries.returnAllProbabilities(camera);
+		}else {
+			throw new BadRequestException("Please specify camera");
 		}
 
 		return CollectionResponse.<ProbabilityContainer> builder().setItems(result)
