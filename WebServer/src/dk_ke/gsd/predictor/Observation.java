@@ -16,7 +16,7 @@ public class Observation {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long objectId;
-	private Long unixCaptureTimestap;
+	private Long unixCaptureTimestamp;
 	private Date captureDate;
 	
 	@Enumerated(EnumType.STRING)
@@ -34,12 +34,12 @@ public class Observation {
 		this.objectId = objectId;
 	}
 		
-	public Long getUnixCaptureTimestap() {
-		return unixCaptureTimestap;
+	public Long getUnixCaptureTimestamp() {
+		return unixCaptureTimestamp;
 	}
-	public void setUnixCaptureTimestap(Long unixCaptureTimestap) {
-		this.unixCaptureTimestap = unixCaptureTimestap;
-		setCaptureDate(new Date(unixCaptureTimestap*1000));
+	public void setUnixCaptureTimestamp(Long unixCaptureTimestamp) {
+		this.unixCaptureTimestamp = unixCaptureTimestamp;
+		setCaptureDate(new Date(unixCaptureTimestamp*1000));
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(getCaptureDate());
 		setDay(DayOfTheWeek.fromCalendarDay(cal.get(Calendar.DAY_OF_WEEK)));
