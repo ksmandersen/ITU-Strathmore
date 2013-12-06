@@ -2,7 +2,7 @@
 package dk_ke.gsd.servlets;
 
 import java.io.IOException;
-import java.util.List;
+
 
 import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServlet;
@@ -19,7 +19,7 @@ import dk_ke.gsd.images.Image;
 
 public class Serve extends HttpServlet {
 	private BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
- 	@SuppressWarnings("unchecked")
+
  	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException {
 	   EntityManager mgr = null;

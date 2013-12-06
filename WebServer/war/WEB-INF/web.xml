@@ -20,20 +20,4 @@
     <servlet-name>UploadBlob-servlet</servlet-name>
     <url-pattern>/images/blob_upload</url-pattern>
   </servlet-mapping>
-   <servlet>
-    <servlet-name>ServeBlob-servlet</servlet-name>
-    <servlet-class>dk_ke.gsd.servlets.Serve</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>ServeBlob-servlet</servlet-name>
-    <url-pattern>/images/latest</url-pattern>
-  </servlet-mapping>
-  <servlet>
-    <servlet-name>UploadURL-servlet</servlet-name>
-    <servlet-class>dk_ke.gsd.servlets.UploadURL</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>UploadURL-servlet</servlet-name>
-    <url-pattern>/images/upload_url</url-pattern>
-  </servlet-mapping>
 </web-app>

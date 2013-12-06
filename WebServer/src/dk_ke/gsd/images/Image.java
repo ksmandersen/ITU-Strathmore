@@ -8,6 +8,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 import com.google.appengine.api.blobstore.BlobKey;
 
@@ -23,6 +24,8 @@ public class Image {
 	private Camera camera;
 	private Long unixCaptureTimestap;
 	private Date captureTimestamp;
+	@Transient 
+	private byte[] image;
 	
 	public Image(Camera camera, Long unixTimestamp, BlobKey blobkey) {
 		setCamera(camera);
@@ -61,5 +64,14 @@ public class Image {
 	public void setCaptureDate(Date takenDate) {
 		this.captureTimestamp = takenDate;
 	}
+	
+	public byte[] getImage() {
+		return image;
+	}
+
+	public void setImage(byte[] image) {
+		this.image = image;
+	}
+
 	
 }

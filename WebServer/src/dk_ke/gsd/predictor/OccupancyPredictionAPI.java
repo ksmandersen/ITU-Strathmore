@@ -21,10 +21,15 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.CollectionResponse;
+import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.datanucleus.query.JPACursorHelper;
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONObject;
+
+import dk_ke.gsd.images.Image;
+import dk_ke.gsd.images.UploadUrl;
 
 @Api(name = "occupancyPredictionAPI", version = "v1", scopes = { "https://www.googleapis.com/auth/userinfo.email" },
 // This will have more clientIds when we create them. So far this is only the
@@ -33,28 +38,17 @@ clientIds = { "390025593484.apps.googleusercontent.com" })
 public class OccupancyPredictionAPI {
 	private static final Logger log = Logger
 			.getLogger(OccupancyPredictionAPI.class.getName());
-	private static final int RESULT_HARD_LIMIT = 10000;
-
-	private boolean present(Object obj) {
-		return (obj != null);
-	}
 	
-	@SuppressWarnings({ "unused" })
 	@ApiMethod(name = "listAllProbabilities", path = "all_probabilities")
 	public CollectionResponse<ProbabilityContainer> listAllProbabilities(
-
-	@Named("camera") Camera camera) throws BadRequestException {
-
+			@Named("camera") Camera camera) throws BadRequestException {
 		List<ProbabilityContainer> result = null;
-		
 		if (camera != null) {
 			result = Queries.returnAllProbabilities(camera);
-		}else {
+		} else {
 			throw new BadRequestException("Please specify camera");
 		}
-
-		return CollectionResponse.<ProbabilityContainer> builder().setItems(result)
-				.build();
+		return CollectionResponse.<ProbabilityContainer> builder().setItems(result).build();
 	}
 
 	@SuppressWarnings({ "unused" })
@@ -136,25 +130,6 @@ public class OccupancyPredictionAPI {
 		return CollectionResponse.<Observation> builder().setItems(execute).build();
 	}
 
-	/**
-	 * This method gets the entity having primary key id. It uses HTTP GET
-	 * method.
-	 * 
-	 * @param id
-	 *            the primary key of the java bean.
-	 * @return The entity with primary key id.
-	 */
-	@ApiMethod(name = "getObservation")
-	public Observation getObservation(@Named("id") Long id) {
-		EntityManager mgr = EMF.getEntityManager();
-		Observation observation = null;
-		try {
-			observation = mgr.find(Observation.class, id);
-		} finally {
-			mgr.close();
-		}
-		return observation;
-	}
 
 	/**
 	 * This inserts a new entity into App Engine datastore. If the entity
@@ -199,16 +174,45 @@ public class OccupancyPredictionAPI {
 		return observations;
 	}
 
-	@ApiMethod(name = "uploadUrl", path = "upload/url", httpMethod = HttpMethod.GET)
-	public List<String> getUploadUrl() {
-		BlobstoreService blobstoreService = BlobstoreServiceFactory
-				.getBlobstoreService();
-		String blobUploadUrl = blobstoreService.createUploadUrl("/blob/upload");
-		ArrayList<String> al = new ArrayList<String>();
-		al.add(blobUploadUrl);
-		return al;
+	@ApiMethod(name = "uploadUrl", path = "images/upload_url", httpMethod = HttpMethod.GET)
+	public UploadUrl uploadUrl(@Named("camera") String camera, @Named("date") String timestamp) {
+		BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+		String blobUploadUrl = blobstoreService.createUploadUrl("/images/blob_upload?camera="+camera+"&date="+timestamp);
+		UploadUrl url = new UploadUrl();
+		url.setUrl(blobUploadUrl);
+		return url;
 	}
 
+	@ApiMethod(name = "latestImage", httpMethod = HttpMethod.GET)
+	public Image latestImage(@Named("camera") String camera) {
+		BlobstoreService blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
+		EntityManager mgr = null;
+		Image img = null;
+		try {
+			mgr = EMF.getEntityManager();
+			Query query = mgr.createQuery("SELECT i FROM Image i where i.camera = :camera ORDER BY captureTimestamp DESC", Image.class);
+			query.setParameter("camera", camera);
+			query.setMaxResults(1);
+			img = (Image)query.getSingleResult();
+		} finally {
+			mgr.close();
+		}
+			  
+		BlobKey blobKey = img.getBlobKey();
+		img.setImage(blobstoreService.fetchData(blobKey, 0, BlobstoreService.MAX_BLOB_FETCH_SIZE-1));
+		return img; 
+	}
+	
+	
+	private boolean present(Object obj) {	
+		if (obj instanceof String) {
+			return (obj != null && ((String)obj).trim() != "");
+		}
+		else {
+			return (obj != null);
+		}
+	}
+	
 	private boolean containsObservation(Observation observation) {
 		EntityManager mgr = EMF.getEntityManager();
 		boolean contains = true;
