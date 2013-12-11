@@ -20,8 +20,8 @@ class Target:
 
     def __init__(self):
 
-        self.capture = cv.CaptureFromCAM(0)
-        #self.capture = cv.CaptureFromFile("rasmus.mov")
+        #self.capture = cv.CaptureFromCAM(0)
+        self.capture = cv.CaptureFromFile("Video.mov")
         #TODO!
         #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320)
         #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
@@ -35,9 +35,9 @@ class Target:
     def send_occupancy(self):
         # send http request
         timestamp = datetime.datetime.utcnow().strftime('%s')
-        payload = {'occupancy': self.observed_occupancy, 'camera': 'CAM_01', "captureDate": timestamp}
+        payload = {'occupancy': self.observed_occupancy, 'camera': 'CAM_02', "unixCaptureTimestamp": timestamp}
         headers = {'content-type': 'application/json'}
-        url = "https://itu-strath-occupancy.appspot.com/_ah/api/occupancyPredictionAPI/v1/observation"
+        url = "https://itu-strathmore-occupancy.appspot.com/_ah/api/occupancyPredictionAPI/v1/observation"
         r = requests.post(url, data=json.dumps(payload), headers=headers)
 
         self.last_request = time.time()
@@ -49,7 +49,8 @@ class Target:
         filename = str(timestamp)+".png"
         cv.SaveImage(filename, image)
         #url = "http://localhost:8888/images/upload_url"
-        url = "https://itu-strath-occupancy.appspot.com/images/upload_url"
+        #url = "https://itu-strath-occupancy.appspot.com/images/upload_url"
+        url = "https://itu-strathmore-occupancy.appspot.com/_ah/api/occupancyPredictionAPI/v1/images/upload_url"
         data = { 'camera': 'CAM_02', 'date': timestamp }
         request_upload_url = requests.get(url, params=data)
         upload_url = str(request_upload_url.json()['url'])
@@ -166,7 +167,7 @@ class Target:
             cv.ShowImage("Target", color_image)
 
             time_passed = time.time() - self.last_request
-            request_threshold = 60
+            request_threshold = 5
             if time_passed > request_threshold:
                 self.send_occupancy()
                 self.send_image(color_image)
