@@ -24,9 +24,6 @@ import com.google.api.server.spi.response.CollectionResponse;
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
-import com.google.appengine.api.datastore.Cursor;
-import com.google.appengine.labs.repackaged.org.json.JSONException;
-import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
 import dk_ke.gsd.images.Image;
 import dk_ke.gsd.images.UploadUrl;
@@ -59,7 +56,6 @@ public class OccupancyPredictionAPI {
 			@Nullable @Named("timeOfDay") Integer timeOfDay)
 					throws BadRequestException {
 		EntityManager mgr = null;
-		Cursor cursor = null;
 		List<Probability> result = null;
 		Query query = null;
 
@@ -87,16 +83,16 @@ public class OccupancyPredictionAPI {
 	 * GET method and paging support.
 	 * 
 	 * @return A CollectionResponse class containing the list of all entities
-	 *         persisted and a cursor to the next page.
+	 *         persisted
 	 */
 	@SuppressWarnings({ "unchecked", "unused" })
 	@ApiMethod(name = "listObservations", path = "observations")
 	public CollectionResponse<Observation> listObservation(
 			@Nullable @Named("from") Date from,
-			@Nullable @Named("to") Date to) {
+			@Nullable @Named("to") Date to,
+			@Nullable @Named("camera") String camera) {
 
 		EntityManager mgr = null;
-		Cursor cursor = null;
 		List<Observation> execute = null;
 		Query query = null;
 		try {
@@ -112,6 +108,9 @@ public class OccupancyPredictionAPI {
 	        }
 	        if (present(to)) {
 	        	predicates.add(cb.lessThanOrEqualTo(observation.<Date>get("captureDate"), to));
+	        }
+	        if (present(camera)) {
+	        	predicates.add(cb.equal(observation.get("camera"), camera));
 	        }
 	        cq.where(predicates.toArray(new Predicate[predicates.size()]));
 
