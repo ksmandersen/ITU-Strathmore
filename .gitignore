@@ -1,3 +1,5 @@
+.DS_Store
 .metadata/
 RemoteSystemsTempFiles/
 WebServer/war/WEB-INF/appengine-generated/
+WebServer/.classpath

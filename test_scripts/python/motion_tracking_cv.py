@@ -2,7 +2,12 @@
 
 import cv
 import inspect
-import math 
+import math
+import time
+import datetime
+import requests
+import json
+import calendar
 
 
 class TrackedObject: 
@@ -16,7 +21,7 @@ class Target:
     def __init__(self):
 
         #self.capture = cv.CaptureFromCAM(0)
-        self.capture = cv.CaptureFromFile("rasmus.mov")
+        self.capture = cv.CaptureFromFile("Video.mov")
         #TODO!
         #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_WIDTH, 320)
         #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
@@ -24,22 +29,52 @@ class Target:
         # Creates a new window
         cv.NamedWindow("Target", 1)
         self.tracked_objects = []
+        self.last_request = time.time()
+        self.observed_occupancy = False
+
+    def send_occupancy(self):
+        # send http request
+        timestamp = datetime.datetime.utcnow().strftime('%s')
+        payload = {'occupancy': self.observed_occupancy, 'camera': 'CAM_02', "unixCaptureTimestamp": timestamp}
+        headers = {'content-type': 'application/json'}
+        url = "https://itu-strathmore-occupancy.appspot.com/_ah/api/occupancyPredictionAPI/v1/observation"
+        r = requests.post(url, data=json.dumps(payload), headers=headers)
+
+        self.last_request = time.time()
+        self.observed_occupancy = False
+
+    def send_image(self, image):
+        #Post an image 
+        timestamp = datetime.datetime.utcnow().strftime('%s')
+        filename = str(timestamp)+".png"
+        cv.SaveImage(filename, image)
+        #url = "http://localhost:8888/images/upload_url"
+        #url = "https://itu-strath-occupancy.appspot.com/images/upload_url"
+        url = "https://itu-strathmore-occupancy.appspot.com/_ah/api/occupancyPredictionAPI/v1/images/upload_url"
+        data = { 'camera': 'CAM_02', 'date': timestamp }
+        request_upload_url = requests.get(url, params=data)
+        upload_url = str(request_upload_url.json()['url'])
+        print upload_url
+        files = {'file': open(filename, 'rb')}
+        r2 = requests.post(upload_url, files=files) 
 
     def run(self):
         # Capture first frame to get size
         frame = cv.QueryFrame(self.capture)
         frame_size = cv.GetSize(frame)
-        print frame_size
-        color_image = cv.CreateImage(cv.GetSize(frame), 8, 3)
-        grey_image = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_8U, 1)
-        moving_average = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_32F, 3)
+        new_size = ( frame_size[0] / 2, frame_size[1] / 2)
+        color_image = cv.CreateImage(new_size, 8, 3)
+        grey_image = cv.CreateImage(new_size, cv.IPL_DEPTH_8U, 1)
+        moving_average = cv.CreateImage(new_size, cv.IPL_DEPTH_32F, 3)
         font = cv.InitFont(cv.CV_FONT_HERSHEY_COMPLEX_SMALL, 1, 1, 0, 1, 1)
         first = True
-        k = 0
+        k = 0        
         while True:
             k+=1
-            color_image = cv.QueryFrame(self.capture)
 
+            captured_image = cv.QueryFrame(self.capture)
+            color_image = cv.CreateImage(new_size, captured_image.depth, captured_image.nChannels)
+            cv.Resize(captured_image, color_image)
             # Smooth to get rid of false positives
             cv.Smooth(color_image, color_image, cv.CV_GAUSSIAN, 3, 0)
 
@@ -73,12 +108,12 @@ class Target:
             #cv.DrawContours(color_image, contour, cv.CV_RGB(255,0,0), cv.CV_RGB(255,0,255), 2, 1, 8, (0, 0))
             i = 0
             while contour:
+                self.observed_occupancy = True
 
                 bound_rect = cv.BoundingRect(list(contour))
 
                 center_x = bound_rect[0] + (bound_rect[2]/2)
                 center_y = bound_rect[1] + (bound_rect[3]/2)
-                print "CENTER ", center_x, center_y
                 #if center_y < 200:
                 #    continue
                 i+=1
@@ -116,20 +151,26 @@ class Target:
                 cv.PutText(color_image, str(i), pt1, font, cv.CV_RGB(255,0,255))
                 cv.Circle(color_image, (center_x, center_y), 2, cv.CV_RGB(255,0,255), 2, 8, 0)
 
-            print "LEN ", len(self.tracked_objects)
-            if len(self.tracked_objects) > 0 and self.tracked_objects[0] is not None:
-                #print "ENTRE"
-                obj_vector = self.tracked_objects[0].movement_vector
-                print "MVV LEN ", len(obj_vector)
-                for index in range(0, len(obj_vector)-2):
-                    try: 
-                        print "Index ", index, "len(obj_vector) ", len(obj_vector)
-                        cv.Line(color_image, obj_vector[index], obj_vector[index+1], cv.CV_RGB(0,255,0))
-
-                    except: print "oops"
+            #print "LEN ", len(self.tracked_objects)
+            #if len(self.tracked_objects) > 0 and self.tracked_objects[0] is not None:
+            #    #print "ENTRE"
+            #    obj_vector = self.tracked_objects[0].movement_vector
+            #    print "MVV LEN ", len(obj_vector)
+            #    for index in range(0, len(obj_vector)-2):
+            #        try:
+            #            print "Index ", index, "len(obj_vector) ", len(obj_vector)
+            #            cv.Line(color_image, obj_vector[index], obj_vector[index+1], cv.CV_RGB(0,255,0))
+            #
+            #        except: print "oops"
 
             #print "Iteration ", k, " Vector: ", vectors["1"]
             cv.ShowImage("Target", color_image)
+
+            time_passed = time.time() - self.last_request
+            request_threshold = 5
+            if time_passed > request_threshold:
+                self.send_occupancy()
+                self.send_image(color_image)
             
             
             #Listen for ESC key
