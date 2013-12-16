@@ -1,12 +1,12 @@
 {
   "extends" : "thirdParty.api",
   "abstract" : false,
-  "root" : "https://itu-strathmore-occupancy.appspot.com/_ah/api",
+  "root" : "https://itu-strath-occupancy.appspot.com/_ah/api",
   "name" : "occupancyPredictionAPI",
   "version" : "v1",
   "defaultVersion" : false,
   "adapter" : {
-    "bns" : "https://itu-strathmore-occupancy.appspot.com/_ah/spi",
+    "bns" : "https://itu-strath-occupancy.appspot.com/_ah/spi",
     "deadline" : 10.0,
     "type" : "lily"
   },
@@ -56,6 +56,10 @@
           },
           "to" : {
             "type" : "datetime",
+            "required" : false
+          },
+          "camera" : {
+            "type" : "string",
             "required" : false
           }
         },
